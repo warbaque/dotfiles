@@ -165,7 +165,7 @@ fi
   esac
 
   typeset -ga POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
-      dir_writable dir custom_rprompt vcs)
+      dir_writable dir custom_context custom_prompt vcs)
 
   typeset -ga POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
       status command_execution_time root_indicator background_jobs time)
@@ -241,9 +241,17 @@ fi
   typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=009
   typeset -g POWERLEVEL9K_CARRIAGE_RETURN_ICON=
 
-  typeset -g POWERLEVEL9K_CUSTOM_RPROMPT=custom_rprompt
-  typeset -g POWERLEVEL9K_CUSTOM_RPROMPT_BACKGROUND=none
-  typeset -g POWERLEVEL9K_CUSTOM_RPROMPT_FOREGROUND=006
+  typeset -g POWERLEVEL9K_CUSTOM_PROMPT=custom_prompt
+  typeset -g POWERLEVEL9K_CUSTOM_PROMPT_BACKGROUND=none
+  typeset -g POWERLEVEL9K_CUSTOM_PROMPT_FOREGROUND=006
 
-  function custom_rprompt() {}  # redefine this to show stuff in custom_rprompt segment
+  typeset -g POWERLEVEL9K_CUSTOM_CONTEXT=custom_context
+  typeset -g POWERLEVEL9K_CUSTOM_CONTEXT_BACKGROUND=none
+
+  function custom_context() {
+    { [[ "$UID" -eq 0 ]] && echo '%F{white}%n%f%F{242}@%m%f' } ||
+    { [[ -n "$SSH_CONNECTION" ]] && echo '%F{242}%n@%m%f' }
+  }
+
+  function custom_prompt() {}
 } "$@"
