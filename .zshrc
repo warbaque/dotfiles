@@ -33,6 +33,7 @@ PATH=/usr/local/bin:$PATH
 # aliases and functions
 alias gs="git status --short"
 alias gd="git diff"
+alias gl="git log --graph --decorate --pretty=oneline --abbrev-commit --all"
 
 # editor
 export EDITOR=vim
