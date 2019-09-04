@@ -1,0 +1,41 @@
+[global_config]
+  always_split_with_profile = True
+  title_hide_sizetext = True
+  title_inactive_bg_color = "#555753"
+  title_inactive_fg_color = "#f3f3f3"
+  title_transmit_bg_color = "#fcaf3e"
+  title_transmit_fg_color = "#000000"
+  window_state = maximise
+[keybindings]
+  broadcast_all = <Primary><Alt>a
+  broadcast_group = <Primary><Alt>g
+  broadcast_off = <Primary><Alt>o
+  edit_tab_title = <Primary><Shift><Alt>a
+  edit_terminal_title = <Primary><Shift><Alt>x
+  edit_window_title = <Primary><Shift><Alt>w
+  go_down = <Primary>Down
+  go_left = <Primary>Left
+  go_right = <Primary>Right
+  go_up = <Primary>Up
+[layouts]
+  [[default]]
+    [[[child1]]]
+      parent = window0
+      type = Terminal
+    [[[window0]]]
+      parent = ""
+      type = Window
+[plugins]
+[profiles]
+  [[default]]
+    background_darkness = 0.8
+    background_type = transparent
+    cursor_color = "#8ae234"
+    cursor_color_fg = False
+    font = Monospace 10
+    foreground_color = "#ffffff"
+    scrollback_infinite = True
+    scrollback_lines = 50000
+    scrollbar_position = hidden
+    urgent_bell = True
+    use_system_font = False
