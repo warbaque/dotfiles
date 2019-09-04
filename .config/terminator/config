@@ -28,11 +28,11 @@
 [plugins]
 [profiles]
   [[default]]
-    background_darkness = 0.8
+    background_darkness = 0.95
     background_type = transparent
     cursor_color = "#8ae234"
     cursor_color_fg = False
-    font = Monospace 10
+    font = Monospace 11
     foreground_color = "#ffffff"
     scrollback_infinite = True
     scrollback_lines = 50000
