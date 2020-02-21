@@ -1,12 +1,17 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 ZPLUG_HOME=$HOME/.zplug
 ZPLUG_LOADFILE=$HOME/dotfiles/packages.zsh
 ZPLUG_CACHE_DIR=$HOME/.cache/zplug
 ZPLUG_LOG_LOAD_SUCCESS=false
 ZPLUG_LOG_LOAD_FAILURE=false
 
-{
-  [[ -d $ZPLUG_HOME ]] || git clone https://github.com/zplug/zplug $ZPLUG_HOME
-}
+[[ -d $ZPLUG_HOME ]] || git clone https://github.com/zplug/zplug $ZPLUG_HOME
 
 source "$ZPLUG_HOME/init.zsh"
 
@@ -21,7 +26,7 @@ zplug "lib/key-bindings",           from:oh-my-zsh
 zplug "lib/theme-and-appearance",   from:oh-my-zsh
 
 zplug "romkatv/powerlevel10k",      use:powerlevel10k.zsh-theme, as:theme
-zplug "warbaque/dotfiles",          use:.purepower
+zplug "warbaque/dotfiles",          use:.p10k.zsh
 
 zplug "psprint/history-search-multi-word", defer:1
 zplug "zsh-users/zsh-syntax-highlighting", defer:2
