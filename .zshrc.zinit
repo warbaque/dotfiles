@@ -1,0 +1,73 @@
+test -d ~/.zinit || {
+  mkdir ~/.zinit
+  git clone https://github.com/zdharma/zinit.git ~/.zinit/bin
+}
+
+source ~/.zinit/bin/zinit.zsh
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+# ===============================================
+
+zinit snippet OMZL::directories.zsh
+zinit snippet OMZL::history.zsh
+zinit snippet OMZL::completion.zsh
+zinit snippet OMZL::key-bindings.zsh
+
+zinit depth=1 lucid nocd for romkatv/powerlevel10k
+zinit snippet https://github.com/warbaque/dotfiles/blob/master/.p10k.zsh
+
+zinit ice blockf atpull'zinit creinstall -q .'
+zinit light zsh-users/zsh-completions
+
+zinit ice wait"1" lucid \
+  atinit"zpcompinit; zpcdreplay" \
+  atload'FAST_HIGHLIGHT[chroma-git]="chroma-ogit.ch"'
+zinit light zdharma/fast-syntax-highlighting
+
+zinit pack"bgn-binary+keys" for fzf
+zinit ice as"command" from"gh-r" mv"bat* -> bat" pick"bat/bat"
+zinit light sharkdp/bat
+export FZF_CTRL_R_OPTS="--sort --exact --preview-window=down:3:wrap --preview='printf %s {} | bat -l sh --color always -pp --theme=\"TwoDark\"'"
+
+zinit pack for ls_colors
+
+# ===============================================
+# ALIASES
+alias gs="git status --short"
+alias gd="git diff"
+alias gl="git log --graph --decorate --pretty=oneline --abbrev-commit --all"
+
+alias ls="ls --color=auto"
+alias diff="diff --color"
+
+# ===============================================
+#setopt 'auto_cd'    'no_bg_nice'    'no_flow_control'  'hist_find_no_dups'
+#setopt 'c_bases'    'hist_verify'   'auto_param_slash' 'hist_ignore_space'
+#setopt 'multios'    'always_to_end' 'complete_in_word' 'interactive_comments'
+#setopt 'path_dirs'  'extended_glob' 'extended_history' 'hist_expire_dups_first'
+#setopt 'auto_pushd' 'share_history' 'hist_ignore_dups' 'no_prompt_bang'
+#setopt 'prompt_cr'  'prompt_sp'     'prompt_percent'   'no_prompt_subst'
+#setopt 'no_bg_nice' 'no_aliases'    'typeset_silent'
+
+# ===============================================
+# PROJECT SPECIFIC CUSTOMIZATION
+project-settings() {
+  local settings="$HOME/workspace/settings.zsh"
+  case "$1" in
+    reload) [[ -r $settings ]] && . "$settings" || : ;;
+    "")
+        echo "Settings"
+        [ -L "$settings" ] &&
+        echo "  link: $(realpath -s "$settings")"
+        echo "  file: $(realpath -P "$settings")"
+        echo
+        echo "Usage:"
+        echo "  $0 reload       reload settings"
+        echo "  $0 [cmd]        open settings with [cmd]"
+    ;;
+    *) $1 "$settings" ;;
+  esac
+}
+
+project-settings reload
