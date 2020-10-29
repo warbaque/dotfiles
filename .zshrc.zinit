@@ -58,19 +58,21 @@ alias diff="diff --color"
 # PROJECT SPECIFIC CUSTOMIZATION
 project-settings() {
   local settings="$HOME/workspace/settings.zsh"
-  case "$1" in
-    reload) [[ -r $settings ]] && . "$settings" || : ;;
+  case "${1}" in
+    reload) [[ -r $settings ]] && . "${settings}" || : ;;
+    link) ln -sf "$(realpath "${2}")" "${settings}" ;;
     "")
         echo "Settings"
-        [ -L "$settings" ] &&
-        echo "  link: $(realpath -s "$settings")"
-        echo "  file: $(realpath -P "$settings")"
+        test -L "${settings}" &&
+        echo "  link: $(realpath -s "${settings}")"
+        echo "  file: $(realpath -P "${settings}")"
         echo
         echo "Usage:"
-        echo "  $0 reload       reload settings"
-        echo "  $0 [cmd]        open settings with [cmd]"
+        echo "  ${0} reload       reload settings"
+        echo "  ${0} link {file}  link to settings file"
+        echo "  ${0} [cmd]        open settings with [cmd]"
     ;;
-    *) $1 "$settings" ;;
+    *) ${1} "${settings}" ;;
   esac
 }
 
