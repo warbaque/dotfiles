@@ -1,0 +1,16 @@
+[user]
+	name = warbaque
+	email = klaus.helenius@gmail.com
+	signingkey = F009530205B512AE
+[credential]
+	helper = cache --timeout=3600
+[push]
+	default = simple
+[core]
+	editor = vim
+	eol = native
+	autocrlf = input
+[color]
+	ui = true
+[init]
+	defaultBranch = main
