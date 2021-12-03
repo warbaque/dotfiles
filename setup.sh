@@ -21,4 +21,5 @@ sudo chsh -s $(which zsh) $(whoami)
 ln -sf $HOME/{dotfiles,}/.zshrc
 ln -sf $HOME/{dotfiles,}/.tmux.conf
 ln -sf $HOME/{dotfiles,}/.config/terminator
+ln -sf $HOME/{dotfiles,}/.gitconfig
 
