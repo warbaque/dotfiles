@@ -1,16 +1,21 @@
+# ==================================================
+
+# install zinit
 test -d ~/.zinit || {
   mkdir ~/.zinit
-  git clone https://github.com/zdharma/zinit.git ~/.zinit/bin
+  git clone https://github.com/zdharma-continuum/zinit.git ~/.zinit/bin
 }
+
+# instant mode p10k
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
 
 source ~/.zinit/bin/zinit.zsh
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
-# ===============================================
-
-zinit light zinit-zsh/z-a-bin-gem-node
-zinit light zinit-zsh/z-a-patch-dl
+# ==================================================
 
 zinit snippet OMZL::grep.zsh
 zinit snippet OMZL::directories.zsh
@@ -24,20 +29,16 @@ zinit snippet https://github.com/warbaque/dotfiles/blob/master/.p10k.zsh
 zinit ice blockf atpull'zinit creinstall -q .'
 zinit light zsh-users/zsh-completions
 
-zinit ice wait"1" lucid \
-  atinit"zpcompinit; zpcdreplay" \
-  atload'FAST_HIGHLIGHT[chroma-git]="chroma-ogit.ch"'
-zinit light zdharma/fast-syntax-highlighting
-
-zinit pack"bgn-binary+keys" for fzf
-zinit ice as"command" from"gh-r" mv"bat* -> bat" pick"bat/bat"
-zinit light sharkdp/bat
-export FZF_CTRL_R_OPTS="--sort --exact --preview-window=down:3:wrap --preview='printf %s {} | bat -l sh --color always -pp --theme=\"TwoDark\"'"
+zinit load zdharma-continuum/history-search-multi-word
+zstyle ":history-search-multi-word" page-size "LINES/2"
+zstyle ":history-search-multi-word" highlight-color "bold,fg=yellow"
+zstyle ":plugin:history-search-multi-word" active "bold,standout"
+zinit light zdharma-continuum/fast-syntax-highlighting
 
 zinit pack for ls_colors
 
-# ===============================================
-# ALIASES
+# ===[ALIASES]======================================
+
 alias gs="git status --short"
 alias gd="git diff"
 alias gl="git log --graph --decorate --pretty=oneline --abbrev-commit --all"
@@ -45,7 +46,7 @@ alias gl="git log --graph --decorate --pretty=oneline --abbrev-commit --all"
 alias ls="ls --color=auto"
 alias diff="diff --color"
 
-# ===============================================
+# ==================================================
 #setopt 'auto_cd'    'no_bg_nice'    'no_flow_control'  'hist_find_no_dups'
 #setopt 'c_bases'    'hist_verify'   'auto_param_slash' 'hist_ignore_space'
 #setopt 'multios'    'always_to_end' 'complete_in_word' 'interactive_comments'
@@ -54,7 +55,7 @@ alias diff="diff --color"
 #setopt 'prompt_cr'  'prompt_sp'     'prompt_percent'   'no_prompt_subst'
 #setopt 'no_bg_nice' 'no_aliases'    'typeset_silent'
 
-# ===============================================
+# ==================================================
 # PROJECT SPECIFIC CUSTOMIZATION
 project-settings() {
   local settings="$HOME/workspace/settings.zsh"
@@ -77,3 +78,26 @@ project-settings() {
 }
 
 project-settings reload
+
+
+export GOPATH="${HOME}/go"
+export PATH="${PATH}:/usr/local/go/bin:${GOPATH}/bin:${HOME}/workspace/common/bin"
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+
+kube-toggle() {
+  if (( ${+POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND} )); then
+    unset POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND
+  else
+    POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND='kubectl|helm|kubens|kubectx|oc|istioctl|kogito|k9s|helmfile|flux|fluxctl|stern'
+  fi
+  p10k reload
+  if zle; then
+    zle push-input
+    zle accept-line
+  fi
+}
