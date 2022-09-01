@@ -24,7 +24,7 @@ zinit snippet OMZL::completion.zsh
 zinit snippet OMZL::key-bindings.zsh
 
 zinit depth=1 lucid nocd for romkatv/powerlevel10k
-zinit snippet https://github.com/warbaque/dotfiles/blob/master/.p10k.zsh
+zinit snippet https://github.com/warbaque/dotfiles/blob/main/.p10k.zsh
 
 zinit ice blockf atpull'zinit creinstall -q .'
 zinit light zsh-users/zsh-completions
