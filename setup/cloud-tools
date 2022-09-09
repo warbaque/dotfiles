@@ -1,0 +1,72 @@
+#! /usr/bin/env bash
+
+# === [ANSI] ====================================
+
+RESET='\e[0m'
+CYAN='\e[1;36m'
+
+# ===============================================
+
+tools=(
+  az
+  aws
+  gcloud
+)
+
+# ===============================================
+
+version_az()      { az version | jq -j '."azure-cli"'; }
+version_aws()     { aws --version | grep -Po "aws-cli/\K\S+"; }
+version_gcloud()  { gcloud version | grep -Po "Google Cloud SDK \K\S+"; }
+
+# ===============================================
+
+_install () {
+  local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
+  cd "${tmp_dir}"
+  echo -e "${CYAN}Installing ${1}${RESET}"
+  "install_${1}" | sed "s/^/\r  /"
+  rm -rf "${tmp_dir}"
+}
+
+install_az() {
+  curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+}
+
+install_aws() {
+  curl -sLO "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+  unzip awscli-exe-linux-x86_64.zip
+  sudo ./aws/install
+}
+
+install_gcloud() {
+  sudo apt-get update && sudo apt-get install apt-transport-https ca-certificates gnupg
+  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+    | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+  curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    | sudo gpg --dearmor -o /etc/apt/keyrings/cloud.google.gpg
+  sudo apt-get update && sudo apt-get install google-cloud-cli
+}
+
+# ===============================================
+
+status() {
+  echo -e "${CYAN}Status ${1}${RESET}"
+  for cmd in "${tools[@]}"; do
+    if command -v "${cmd}" >/dev/null 2>&1; then
+      local is_installed='✓'
+      local version="$(version_${cmd})";
+    else
+      local is_installed=' '
+      local version="";
+    fi
+    printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
+  done
+}
+
+# ===============================================
+
+case "${1}" in
+  az|aws|gcloud) _install ${1} ;;
+  *) status ;;
+esac
