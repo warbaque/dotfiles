@@ -25,7 +25,7 @@ _install () {
   local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
   cd "${tmp_dir}"
   echo -e "${CYAN}Installing ${1}${RESET}"
-  "install_${1}" | sed "s/^/\r  /"
+  "install_${1}" "${@:2}" | sed "s/^/\r  /"
   rm -rf "${tmp_dir}"
 }
 
@@ -36,7 +36,7 @@ install_az() {
 install_aws() {
   curl -sLO "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
   unzip awscli-exe-linux-x86_64.zip
-  sudo ./aws/install
+  sudo ./aws/install "${@}"
 }
 
 install_gcloud() {
@@ -67,6 +67,6 @@ status() {
 # ===============================================
 
 case "${1}" in
-  az|aws|gcloud) _install ${1} ;;
+  az|aws|gcloud) _install "${@}" ;;
   *) status ;;
 esac
