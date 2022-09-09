@@ -1,0 +1,96 @@
+#! /usr/bin/env bash
+
+# === [ANSI] ====================================
+
+RESET='\e[0m'
+CYAN='\e[1;36m'
+
+# ===============================================
+
+tools=(
+  kubectl
+  kustomize
+  helm
+  minikube
+  k3d
+  kind
+)
+
+# ===============================================
+
+version_kubectl()   { kubectl version --client --output=json | jq -j .clientVersion.gitVersion; }
+version_kustomize() { kustomize version --short | grep -Po "{kustomize/\K(\S+)"; }
+version_helm()      { helm version --short; }
+version_minikube()  { minikube version | grep -Po "version: \K\S+"; }
+version_k3d()       { k3d version | head -1 | grep -Po "version \K\S+"; }
+version_kind()      { kind version | grep -Po "kind \K(\S+)"; }
+
+# ===============================================
+
+_install () {
+  local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
+  cd "${tmp_dir}"
+  echo -e "${CYAN}Installing ${1}${RESET}"
+  "install_${1}" | sed "s/^/\r  /"
+  rm -rf "${tmp_dir}"
+}
+
+install_kubectl() {
+  curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  rm kubectl
+}
+
+install_kustomize() {
+  curl -sL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+  sudo install -o root -g root -m 0755 kustomize /usr/local/bin/kustomize
+  rm kustomize
+}
+
+install_helm() {
+  curl -sL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+}
+
+install_minikube() {
+  curl -sLO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+  sudo install -o root -g root -m 0755 minikube-linux-amd64 /usr/local/bin/minikube
+}
+
+install_k3d() {
+  curl -sL https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+}
+
+install_kind() {
+  curl -sLO https://kind.sigs.k8s.io/dl/v0.15.0/kind-linux-amd64
+  sudo install -o root -g root -m 0755 kind-linux-amd64 /usr/local/bin/kind
+}
+
+install_all() {
+  for cmd in "${tools[@]}"; do
+    _install "${cmd}"
+  done
+}
+
+# ===============================================
+
+status() {
+  echo -e "${CYAN}Status ${1}${RESET}"
+  for cmd in "${tools[@]}"; do
+    if command -v "${cmd}" >/dev/null 2>&1; then
+      local is_installed='✓'
+      local version="$(version_${cmd})";
+    else
+      local is_installed=' '
+      local version="";
+    fi
+    printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
+  done
+}
+
+# ===============================================
+
+case "${1}" in
+  kubectl|kustomize|helm|minikube|k3d|kind) _install "${1}" ;;
+  install|all) install_all ;;
+  *) status ;;
+esac

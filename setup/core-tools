@@ -1,0 +1,64 @@
+#! /usr/bin/env bash
+
+# === [ANSI] ====================================
+
+RESET='\e[0m'
+CYAN='\e[1;36m'
+
+# ===============================================
+
+tools=(
+  jq
+  curl
+  wget
+  file
+  unzip
+  git
+  tree
+  tmux
+  zsh
+  fd
+)
+
+_install() {
+  echo -e "\n${CYAN}Installing${RESET} (${@})"
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update && sudo apt-get install -f ${@}
+  else
+    echo pkg manager not implemented
+  fi
+}
+
+_pkg_name() {
+  case "${1}" in
+    fd) apt-cache search fdfind | cut -d' ' -f1 ;;
+    *) echo "${1}" ;;
+  esac
+}
+
+_check() {
+  echo -e "${CYAN}Status ${1}${RESET}"
+  local missing=()
+
+  for cmd in "${tools[@]}"; do
+    if command -v "${cmd}" >/dev/null 2>&1; then
+      local is_installed='✓'
+    else
+      local is_installed=' '
+      missing+=("$(_pkg_name ${cmd})")
+    fi
+    printf "${is_installed}  %s\n" "${cmd}"
+  done
+
+  [ ${#missing[@]} -ne 0 ] \
+    && _install "${missing[@]}" \
+    || echo "Everything installed"
+}
+
+_post_install() {
+  sudo install -o root -g root -m 0755 $(which fdfind) /usr/local/bin/fd
+}
+
+_check
+_post_install
+
