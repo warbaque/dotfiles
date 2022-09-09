@@ -1,0 +1,66 @@
+#! /usr/bin/env bash
+
+# === [ANSI] ====================================
+
+RESET='\e[0m'
+CYAN='\e[1;36m'
+
+# ===============================================
+
+check_zsh() {
+  if [ $(realpath "${SHELL}") = "$(realpath -P $(which zsh))" ]; then
+    echo -e "${CYAN}zsh${RESET}: OK"
+  else
+    echo -e "${CYAN}zsh${RESET}: change '${SHELL}' to '$(which zsh)'"
+    sudo chsh -s $(which zsh) $(whoami)
+  fi
+}
+
+check_dotfiles_dir() {
+  if test -d "${HOME}/dotfiles"; then
+    echo -e "${CYAN}dotfiles dir${RESET}: OK"
+  else
+    echo -e "${CYAN}dotfiles dir${RESET}: git clone"
+    (cd "${HOME}" && git clone git@github.com:warbaque/dotfiles.git)
+  fi
+}
+
+check_link() {
+  local src="${HOME}/dotfiles/${1}"
+  local dst="${HOME}/${1}"
+
+  if [ "$(realpath -P "${src}")" = "$(realpath -P "${dst}")" ]; then
+    printf "  ✓  %-20s -> %-20s\n" "${dst#$HOME/}" "${src#$HOME/}"
+  elif [ -e "${dst}" ]; then
+    printf "     %-20s != %-20s\n" "(local file)" "${src#$HOME/}"
+  else
+    printf "     %-20s != %-20s\n" "(missing)" "${src#$HOME/}"
+  fi
+}
+
+mklink() {
+  local src="${HOME}/dotfiles/${1}"
+  local dst="${HOME}/${1}"
+
+  test -e "${src}" || { echo "  !  dotfile missing: ${1}"; return; }
+  ln -sf "${src}" "${dst}"
+}
+
+links=(
+  .zshrc
+  .tmux.conf
+  .gitconfig
+  .config/terminator
+)
+
+check_zsh
+check_dotfiles_dir
+
+for file in ${@}; do
+  mklink "${file}"
+done
+
+echo -e "${CYAN}dotfile links${RESET}"
+for link in "${links[@]}"; do
+  check_link "${link}"
+done
