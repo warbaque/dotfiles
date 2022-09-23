@@ -49,6 +49,7 @@ mklink() {
 links=(
   .zshrc
   .tmux.conf
+  .vimrc
   .gitconfig
   .config/terminator
 )
