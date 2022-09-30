@@ -6,6 +6,8 @@
 	helper = cache --timeout=3600
 [push]
 	default = simple
+[pull]
+	ff = only
 [core]
 	editor = vim
 	eol = native

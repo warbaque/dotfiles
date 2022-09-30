@@ -14,7 +14,7 @@ versions() {
   curl -sL https://go.dev/dl/ \
     | sed -rn 's@.*<a class="download" href="/dl/(go1(\.[0-9]+)+).linux-amd64.tar.gz">.*@  \1@p' \
     | sort -V \
-    | sed -r "s@  (${VERSION_INSTALLED})@* \1@"
+    | sed -r "s@  (${VERSION_INSTALLED})\$@* \1@"
 }
 
 
