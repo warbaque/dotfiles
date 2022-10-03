@@ -23,6 +23,8 @@ zinit snippet OMZL::history.zsh
 zinit snippet OMZL::completion.zsh
 zinit snippet OMZL::key-bindings.zsh
 
+zinit load warbaque/kubectx-zshplugin
+
 zinit depth=1 lucid nocd for romkatv/powerlevel10k
 zinit snippet https://github.com/warbaque/dotfiles/blob/main/.p10k.zsh
 
