@@ -19,6 +19,8 @@ tools=(
   zsh
   fd
   vim
+  universal-ctags
+  man-db
 )
 
 _install() {
