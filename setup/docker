@@ -1,0 +1,24 @@
+#! /usr/bin/env bash
+
+_requirements() {
+  sudo apt-get install -y \
+    debian-keyring \
+    debian-archive-keyring \
+    apt-transport-https \
+    lsb-release \
+    gpg
+  sudo mkdir -p /etc/apt/keyrings
+}
+
+_pre_docker() {
+  curl -fsSL "https://download.docker.com/linux/debian/gpg" \
+    | sudo gpg --yes --dearmor -o /etc/apt/keyrings/docker.gpg
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+    | sudo tee /etc/apt/sources.list.d/docker-stable.list
+}
+
+_requirements
+_pre_docker
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
