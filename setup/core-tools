@@ -18,6 +18,7 @@ tools=(
   tmux
   zsh
   fd
+  vim
 )
 
 _install() {
@@ -31,7 +32,7 @@ _install() {
 
 _pkg_name() {
   case "${1}" in
-    fd) apt-cache search fdfind | cut -d' ' -f1 ;;
+    fd) apt-cache search fd-find | grep -P '^fd-find ' | cut -d' ' -f1 ;;
     *) echo "${1}" ;;
   esac
 }
