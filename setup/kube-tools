@@ -14,6 +14,7 @@ tools=(
   minikube
   k3d
   kind
+  skaffold
 )
 
 # ===============================================
@@ -24,6 +25,7 @@ version_helm()      { helm version --short; }
 version_minikube()  { minikube version | grep -Po "version: \K\S+"; }
 version_k3d()       { k3d version | head -1 | grep -Po "version \K\S+"; }
 version_kind()      { kind version | grep -Po "kind \K(\S+)"; }
+version_skaffold()  { skaffold version; }
 
 # ===============================================
 
@@ -71,6 +73,11 @@ install_all() {
   done
 }
 
+install_skaffold() {
+  curl -sLO https://storage.googleapis.com/skaffold/releases/v2.0.0/skaffold-linux-amd64
+  sudo install -o root -g root -m 0755 skaffold-linux-amd64 /usr/local/bin/skaffold
+}
+
 # ===============================================
 
 status() {
@@ -90,7 +97,7 @@ status() {
 # ===============================================
 
 case "${1}" in
-  kubectl|kustomize|helm|minikube|k3d|kind) _install "${1}" ;;
+  kubectl|kustomize|helm|minikube|k3d|kind|skaffold) _install "${1}" ;;
   install|all) install_all ;;
   *) status ;;
 esac
