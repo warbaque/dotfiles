@@ -15,6 +15,7 @@ tools=(
   k3d
   kind
   skaffold
+  argo
 )
 
 # ===============================================
@@ -26,6 +27,7 @@ version_minikube()  { minikube version | grep -Po "version: \K\S+"; }
 version_k3d()       { k3d version | head -1 | grep -Po "version \K\S+"; }
 version_kind()      { kind version | grep -Po "kind \K(\S+)"; }
 version_skaffold()  { skaffold version; }
+version_argo()      { argo version --short | grep -Po "argo: \K\S+"; }
 
 # ===============================================
 
@@ -35,6 +37,19 @@ _install () {
   echo -e "${CYAN}Installing ${1}${RESET}"
   "install_${1}" | sed "s/^/\r  /"
   rm -rf "${tmp_dir}"
+  _status "${1}"
+}
+
+_status() {
+  local cmd="${1}"
+  if command -v "${cmd}" >/dev/null 2>&1; then
+    local is_installed='✓'
+    local version="$(version_${cmd})";
+  else
+    local is_installed=' '
+    local version="";
+  fi
+  printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
 }
 
 install_kubectl() {
@@ -67,37 +82,36 @@ install_kind() {
   sudo install -o root -g root -m 0755 kind-linux-amd64 /usr/local/bin/kind
 }
 
+install_skaffold() {
+  curl -sLO https://storage.googleapis.com/skaffold/releases/v2.0.0/skaffold-linux-amd64
+  sudo install -o root -g root -m 0755 skaffold-linux-amd64 /usr/local/bin/skaffold
+}
+
+install_argo() {
+  curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.4.3/argo-linux-amd64.gz
+  gunzip argo-linux-amd64.gz
+  sudo install -o root -g root -m 0755 argo-linux-amd64 /usr/local/bin/argo
+}
+
+# ===============================================
+
 install_all() {
   for cmd in "${tools[@]}"; do
     _install "${cmd}"
   done
 }
 
-install_skaffold() {
-  curl -sLO https://storage.googleapis.com/skaffold/releases/v2.0.0/skaffold-linux-amd64
-  sudo install -o root -g root -m 0755 skaffold-linux-amd64 /usr/local/bin/skaffold
-}
-
-# ===============================================
-
 status() {
   echo -e "${CYAN}Status ${1}${RESET}"
   for cmd in "${tools[@]}"; do
-    if command -v "${cmd}" >/dev/null 2>&1; then
-      local is_installed='✓'
-      local version="$(version_${cmd})";
-    else
-      local is_installed=' '
-      local version="";
-    fi
-    printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
+    _status "${cmd}"
   done
 }
 
 # ===============================================
 
 case "${1}" in
-  kubectl|kustomize|helm|minikube|k3d|kind|skaffold) _install "${1}" ;;
+  kubectl|kustomize|helm|minikube|k3d|kind|skaffold|argo) _install "${1}" ;;
   install|all) install_all ;;
   *) status ;;
 esac
