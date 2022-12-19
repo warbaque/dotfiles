@@ -16,6 +16,7 @@ tools=(
   kind
   skaffold
   argo
+  flux
 )
 
 # ===============================================
@@ -28,6 +29,7 @@ version_k3d()       { k3d version | head -1 | grep -Po "version \K\S+"; }
 version_kind()      { kind version | grep -Po "kind \K(\S+)"; }
 version_skaffold()  { skaffold version; }
 version_argo()      { argo version --short | grep -Po "argo: \K\S+"; }
+version_flux()      { flux version | head -1 | grep -Po "flux: \K\S+"; }
 
 # ===============================================
 
@@ -93,6 +95,10 @@ install_argo() {
   sudo install -o root -g root -m 0755 argo-linux-amd64 /usr/local/bin/argo
 }
 
+install_flux() {
+  curl -sL https://fluxcd.io/install.sh | sudo bash
+}
+
 # ===============================================
 
 install_all() {
@@ -111,7 +117,7 @@ status() {
 # ===============================================
 
 case "${1}" in
-  kubectl|kustomize|helm|minikube|k3d|kind|skaffold|argo) _install "${1}" ;;
+  kubectl|kustomize|helm|minikube|k3d|kind|skaffold|argo|flux) _install "${1}" ;;
   install|all) install_all ;;
   *) status ;;
 esac
