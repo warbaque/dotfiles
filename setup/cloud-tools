@@ -21,13 +21,27 @@ version_gcloud()  { gcloud version | grep -Po "Google Cloud SDK \K\S+"; }
 
 # ===============================================
 
-_install () {
+_install () {(
   local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
   cd "${tmp_dir}"
   echo -e "${CYAN}Installing ${1}${RESET}"
-  "install_${1}" "${@:2}" | sed "s/^/\r  /"
+  "install_${1}" | sed "s/^/\r  /"
   rm -rf "${tmp_dir}"
+)}
+
+_status() {
+  local cmd="${1}"
+  if command -v "${cmd}" >/dev/null 2>&1; then
+    local is_installed='✓'
+    local version="$(version_${cmd})";
+  else
+    local is_installed=' '
+    local version="";
+  fi
+  printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
 }
+
+# ===============================================
 
 install_az() {
   curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
@@ -40,12 +54,23 @@ install_aws() {
 }
 
 install_gcloud() {
-  sudo apt-get update && sudo apt-get install apt-transport-https ca-certificates gnupg
-  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
-    | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-  curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
-    | sudo gpg --dearmor -o /etc/apt/keyrings/cloud.google.gpg
-  sudo apt-get update && sudo apt-get install google-cloud-cli
+  _apt_setup \
+    "https://packages.cloud.google.com/apt/doc/apt-key.gpg" \
+    google-cloud-sdk.gpg \
+    "https://packages.cloud.google.com/apt cloud-sdk main" \
+    google-cloud-sdk.list
+
+  sudo apt-get update
+  sudo apt-get install google-cloud-cli
+}
+
+_apt_setup() {
+  local keyring=/etc/apt/trusted.gpg.d
+  sudo mkdir -p "${keyring}"
+  curl -fsSL "${1}" \
+    | sudo gpg --yes --dearmor -o "${keyring}/${2}"
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=${keyring}/${2}] ${3}" \
+    | sudo tee "/etc/apt/sources.list.d/${4}"
 }
 
 # ===============================================
@@ -53,14 +78,7 @@ install_gcloud() {
 status() {
   echo -e "${CYAN}Status ${1}${RESET}"
   for cmd in "${tools[@]}"; do
-    if command -v "${cmd}" >/dev/null 2>&1; then
-      local is_installed='✓'
-      local version="$(version_${cmd})";
-    else
-      local is_installed=' '
-      local version="";
-    fi
-    printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
+    _status "${cmd}"
   done
 }
 
@@ -68,5 +86,6 @@ status() {
 
 case "${1}" in
   az|aws|gcloud) _install "${@}" ;;
-  *) status ;;
 esac
+
+status

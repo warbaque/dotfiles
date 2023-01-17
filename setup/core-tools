@@ -19,8 +19,13 @@ tools=(
   zsh
   fd
   vim
+  gpg
+  man
+  lsb_release
+)
+
+resources=(
   universal-ctags
-  man-db
 )
 
 _install() {
@@ -34,8 +39,9 @@ _install() {
 
 _pkg_name() {
   case "${1}" in
-    fd) apt-cache search fd-find | grep -P '^fd-find ' | cut -d' ' -f1 ;;
-    *) echo "${1}" ;;
+    fd)           echo "fd-find" ;;
+    lsb_release)  echo "lsb-release" ;;
+    *)            echo "${1}" ;;
   esac
 }
 
@@ -64,4 +70,3 @@ _post_install() {
 
 _check
 _post_install
-

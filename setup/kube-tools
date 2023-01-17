@@ -29,18 +29,17 @@ version_k3d()       { k3d version | head -1 | grep -Po "version \K\S+"; }
 version_kind()      { kind version | grep -Po "kind \K(\S+)"; }
 version_skaffold()  { skaffold version; }
 version_argo()      { argo version --short | grep -Po "argo: \K\S+"; }
-version_flux()      { flux version | head -1 | grep -Po "flux: \K\S+"; }
+version_flux()      { flux version --client | head -1 | grep -Po "flux: \K\S+"; }
 
 # ===============================================
 
-_install () {
+_install () {(
   local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
   cd "${tmp_dir}"
   echo -e "${CYAN}Installing ${1}${RESET}"
   "install_${1}" | sed "s/^/\r  /"
   rm -rf "${tmp_dir}"
-  _status "${1}"
-}
+)}
 
 _status() {
   local cmd="${1}"
@@ -53,6 +52,8 @@ _status() {
   fi
   printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
 }
+
+# ===============================================
 
 install_kubectl() {
   curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -119,5 +120,6 @@ status() {
 case "${1}" in
   kubectl|kustomize|helm|minikube|k3d|kind|skaffold|argo|flux) _install "${1}" ;;
   install|all) install_all ;;
-  *) status ;;
 esac
+
+status
