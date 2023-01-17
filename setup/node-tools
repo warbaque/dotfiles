@@ -23,16 +23,30 @@ version_yarn()  { yarn --version; }
 
 # ===============================================
 
-_install () {
+_install () {(
   local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
   cd "${tmp_dir}"
   echo -e "${CYAN}Installing ${1}${RESET}"
   "install_${1}" | sed "s/^/\r  /"
   rm -rf "${tmp_dir}"
+)}
+
+_status() {
+  local cmd="${1}"
+  if command -v "${cmd}" >/dev/null 2>&1; then
+    local is_installed='✓'
+    local version="$(version_${cmd})";
+  else
+    local is_installed=' '
+    local version="";
+  fi
+  printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
 }
 
+# ===============================================
+
 install_nvm() {
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+  curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
   init_nvm
 }
 
@@ -49,8 +63,10 @@ install_node() {
 
 install_yarn() {
   command -v npm >/dev/null 2>&1 || install_npm
-  npm install --global yarn 
+  npm install --global yarn
 }
+
+# ===============================================
 
 install_all() {
   for cmd in "${tools[@]}"; do
@@ -59,19 +75,10 @@ install_all() {
   done
 }
 
-# ===============================================
-
 status() {
   echo -e "${CYAN}Status ${1}${RESET}"
   for cmd in "${tools[@]}"; do
-    if command -v "${cmd}" >/dev/null 2>&1; then
-      local is_installed='✓'
-      local version="$(version_${cmd})";
-    else
-      local is_installed=' '
-      local version="";
-    fi
-    printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
+    _status "${cmd}"
   done
 }
 
@@ -83,5 +90,6 @@ case "${1}" in
   nvm|node|yarn) _install "${1}" ;;
   npm) _install node ;;
   install|all) install_all ;;
-  *) status ;;
 esac
+
+status
