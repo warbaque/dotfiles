@@ -4,6 +4,7 @@
 
 RESET='\e[0m'
 CYAN='\e[1;36m'
+YELLOW='\e[1;33m'
 
 # ===============================================
 
@@ -35,10 +36,10 @@ version_flux()      { flux version --client | head -1 | grep -Po "flux: \K\S+"; 
 
 _install () {(
   local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
+  trap "rm -rf ${tmp_dir}" EXIT
   cd "${tmp_dir}"
-  echo -e "${CYAN}Installing ${1}${RESET}"
-  "install_${1}" | sed "s/^/\r  /"
-  rm -rf "${tmp_dir}"
+  echo -e "${CYAN}Installing${RESET} [${YELLOW}${1}${RESET}]"
+  "install_${1}" "${@:2}" | sed "s/^\r*/  /"
 )}
 
 _status() {
@@ -109,7 +110,7 @@ install_all() {
 }
 
 status() {
-  echo -e "${CYAN}Status ${1}${RESET}"
+  echo -e "${CYAN}Status${RESET}"
   for cmd in "${tools[@]}"; do
     _status "${cmd}"
   done
@@ -117,9 +118,7 @@ status() {
 
 # ===============================================
 
-case "${1}" in
-  kubectl|kustomize|helm|minikube|k3d|kind|skaffold|argo|flux) _install "${1}" ;;
-  install|all) install_all ;;
-esac
-
+if [[ " all ${tools[*]} " =~ " ${1} " ]]; then
+  _install "${@}"
+fi
 status
