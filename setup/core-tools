@@ -17,46 +17,40 @@ tools=(
   tree
   tmux
   zsh
-  fd
   vim
   gpg
-  man
-  lsb_release
 )
 
-resources=(
+packages=(
+  fd-find
+  man-db
+  lsb-release
+  dnsutils
+  iputils-ping
   universal-ctags
 )
 
 _install() {
   echo -e "\n${CYAN}Installing${RESET} (${@})"
-  if command -v apt-get >/dev/null 2>&1; then
+  if command -v apt-get &>/dev/null; then
     sudo apt-get update && sudo apt-get install -f ${@}
   else
     echo pkg manager not implemented
   fi
 }
 
-_pkg_name() {
-  case "${1}" in
-    fd)           echo "fd-find" ;;
-    lsb_release)  echo "lsb-release" ;;
-    *)            echo "${1}" ;;
-  esac
-}
-
 _check() {
   echo -e "${CYAN}Status ${1}${RESET}"
   local missing=()
 
-  for cmd in "${tools[@]}"; do
-    if command -v "${cmd}" >/dev/null 2>&1; then
+  for pkg in "${tools[@]}" "${packages[@]}"; do
+    if dpkg -s "${pkg}" &>/dev/null; then
       local is_installed='✓'
     else
       local is_installed=' '
-      missing+=("$(_pkg_name ${cmd})")
+      missing+="${pkg}"
     fi
-    printf "${is_installed}  %s\n" "${cmd}"
+    printf "${is_installed}  %s\n" "${pkg}"
   done
 
   [ ${#missing[@]} -ne 0 ] \
