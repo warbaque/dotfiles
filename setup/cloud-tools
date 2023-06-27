@@ -12,13 +12,15 @@ tools=(
   az
   aws
   gcloud
+  terraform
 )
 
 # ===============================================
 
-version_az()      { az version | jq -j '."azure-cli"'; }
-version_aws()     { aws --version | grep -Po "aws-cli/\K\S+"; }
-version_gcloud()  { gcloud version | grep -Po "Google Cloud SDK \K\S+"; }
+version_az()        { az version | jq -j '."azure-cli"'; }
+version_aws()       { aws --version | grep -Po "aws-cli/\K\S+"; }
+version_gcloud()    { gcloud version | grep -Po "Google Cloud SDK \K\S+"; }
+version_terraform() { terraform version | grep -Po "Terraform \K\S+"; }
 
 # ===============================================
 
@@ -63,6 +65,17 @@ install_gcloud() {
 
   sudo apt-get update
   sudo apt-get install google-cloud-cli
+}
+
+install_terraform() {
+  _apt_setup \
+    "https://apt.releases.hashicorp.com/gpg" \
+    hashicorp-archive-keyring.gpg \
+    "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+    hashicorp.list
+
+  sudo apt-get update
+  sudo apt-get install terraform
 }
 
 _apt_setup() {
