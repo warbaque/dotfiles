@@ -1,21 +1,25 @@
 # ==================================================
 
+ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"/zinit
+
 # install zinit
-test -d ~/.zinit || {
-  mkdir ~/.zinit
-  git clone https://github.com/zdharma-continuum/zinit.git ~/.zinit/bin
+test -d "${ZINIT_HOME}" || {
+  mkdir -p "${ZINIT_HOME}"
+  git clone --depth 1 https://github.com/zdharma-continuum/zinit.git "${ZINIT_HOME}"/bin
 }
 
 # instant mode p10k
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
+source "${ZINIT_HOME}"/bin/zinit.zsh
 
-source ~/.zinit/bin/zinit.zsh
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
 # ==================================================
+
+zinit depth=1 lucid nocd for romkatv/powerlevel10k
 
 zinit snippet OMZL::grep.zsh
 zinit snippet OMZL::directories.zsh
@@ -23,9 +27,8 @@ zinit snippet OMZL::history.zsh
 zinit snippet OMZL::completion.zsh
 zinit snippet OMZL::key-bindings.zsh
 
-zinit load warbaque/kubectx-zshplugin
+zinit load unixorn/kubectx-zshplugin
 
-zinit depth=1 lucid nocd for romkatv/powerlevel10k
 zinit snippet https://github.com/warbaque/dotfiles/blob/main/.p10k.zsh
 
 zinit ice blockf atpull'zinit creinstall -q .'
@@ -41,6 +44,9 @@ zinit ice lucid as"program" pick"bin/git-dsf"
 zinit load zdharma-continuum/zsh-diff-so-fancy
 
 zinit pack for ls_colors
+
+autoload -Uz compinit; compinit
+zinit cdreplay -q
 
 # ===[ALIASES]======================================
 
