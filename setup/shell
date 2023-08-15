@@ -1,0 +1,109 @@
+#! /bin/sh
+
+# === [ANSI] ====================================
+
+RESET='\e[0m'
+CYAN='\e[1;36m'
+YELLOW='\e[1;33m'
+RED='\e[1;31m'
+
+err() { printf "${RED}ERROR${RESET}: ${*}\n" >&2; exit 1; }
+
+# ===============================================
+
+check_cmd() { command -v "${1}" >/dev/null 2>/dev/null; }
+if check_cmd dpkg; then
+  PKGMGR_UPDATE="apt-get update"
+  PKGMGR_INSTALL="apt-get -y install"
+  PKGMGR_CHECK="dpkg -s"
+else
+  err "pkg manager not implemented!"
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=
+elif msg=$(sudo -v 2>&1); then
+  SUDO="sudo "
+else
+  err "${msg}"
+fi
+
+install() {
+  printf "\n${CYAN}INSTALLING${RESET}: ${*}\n"
+  ${SUDO}${PKGMGR_UPDATE}
+  ${SUDO}${PKGMGR_INSTALL} "${@}"
+}
+
+# ===============================================
+
+status() {
+  printf "\n${CYAN}CORE PACKAGES${RESET}: ${1}\n"
+  shift
+  MISSING=""
+  for cmd in ${@}; do
+    if ${PKGMGR_CHECK} "${cmd}" >/dev/null 2>/dev/null; then
+      local is_installed='✓'
+    else
+      local is_installed=' '
+      MISSING="${MISSING}${cmd} "
+    fi
+    printf "${is_installed}  %s\n" "${cmd}"
+  done
+}
+
+core_packages() {
+  status "${@}"
+  if [ -n "${MISSING}" ]; then
+    install ${MISSING}
+    status "${@}"
+  fi
+}
+
+# ===============================================
+
+check_zsh() {
+  local shell=$(realpath -P $(getent passwd $(whoami) | awk -F: '{print $NF}'))
+  local zsh=$(realpath -P $(which zsh))
+  if [ "${shell}" = "${zsh}" ]; then
+    printf "\n${CYAN}ZSH${RESET}: OK\n"
+  else
+    printf "\n${CYAN}ZSH${RESET}: change '${shell}' to '${zsh}'\n"
+    sudo chsh -s ${zsh} $(whoami)
+  fi
+}
+
+check_dotfiles_dir() {
+  if test -d "${HOME}/dotfiles"; then
+    printf "\n${CYAN}DOTFILES${RESET}: OK\n"
+  else
+    printf "\n${CYAN}DOTFILES${RESET}: git clone\n"
+    (cd "${HOME}" && git clone https://github.com/warbaque/dotfiles)
+  fi
+}
+
+# ===============================================
+
+core_packages "minimal" sudo curl git zsh bash jq
+check_zsh
+check_dotfiles_dir
+${HOME}/dotfiles/setup/dotfiles zshrc
+
+# ===============================================
+
+core_packages "extra" \
+  wget \
+  gpg \
+  file \
+  unzip \
+  tree \
+  tmux \
+  vim \
+  fd-find \
+  man-db \
+  lsb-release \
+  dnsutils \
+  iputils-ping \
+  universal-ctags
+sudo install -o root -g root -m 0755 $(which fdfind) /usr/local/bin/fd
+
+# ===============================================
