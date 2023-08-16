@@ -24,14 +24,11 @@ version_yarn()  { yarn --version; }
 
 # ===============================================
 
-_install () {(
+_install () {
   [ "${1}" = npm ] && return
-  local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
-  trap "rm -rf ${tmp_dir}" EXIT
-  cd "${tmp_dir}"
   echo -e "${CYAN}Installing${RESET} [${YELLOW}${1}${RESET}]"
   "install_${1}" "${@:2}" | sed "s/^\r*/  /"
-)}
+}
 
 _status() {
   local cmd="${1}"
@@ -49,7 +46,6 @@ _status() {
 
 install_nvm() {
   curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-  init_nvm
 }
 
 init_nvm() {
@@ -59,13 +55,14 @@ init_nvm() {
 
 install_node() {
   init_nvm
-  command -v nvm >/dev/null 2>&1 || install_nvm
-  nvm install node 2>&1
+  command -v nvm >/dev/null 2>&1 || _install nvm
+  init_nvm && nvm install node 2>&1
 }
 
 install_yarn() {
-  command -v npm >/dev/null 2>&1 || install_npm
-  npm install --global yarn
+  init_nvm
+  command -v npm >/dev/null 2>&1 || _install node
+  init_nvm && npm install --global yarn
 }
 
 # ===============================================
@@ -77,6 +74,7 @@ install_all() {
 }
 
 status() {
+  init_nvm
   echo -e "${CYAN}Status${RESET}"
   for cmd in "${tools[@]}"; do
     _status "${cmd}"
@@ -85,7 +83,6 @@ status() {
 
 # ===============================================
 
-init_nvm
 if [[ " all ${tools[*]} " =~ " ${1} " ]]; then
   _install "${@}"
 fi
