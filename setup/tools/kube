@@ -23,7 +23,7 @@ tools=(
 # ===============================================
 
 version_kubectl()   { kubectl version --client --output=json | jq -j .clientVersion.gitVersion; }
-version_kustomize() { kustomize version --short | grep -Po "{kustomize/\K(\S+)"; }
+version_kustomize() { kustomize version; }
 version_helm()      { helm version --short; }
 version_minikube()  { minikube version | grep -Po "version: \K\S+"; }
 version_k3d()       { k3d version | head -1 | grep -Po "version \K\S+"; }

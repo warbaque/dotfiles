@@ -31,7 +31,7 @@ update() {
     local version_target="${1}"
     local target=target
   else
-    local version_target="$(curl -s 'https://go.dev/VERSION?m=text')"
+    local version_target="$(curl -s 'https://go.dev/VERSION?m=text' | grep '^go')"
     local target=latest
   fi
 
