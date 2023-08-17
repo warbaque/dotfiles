@@ -11,6 +11,7 @@ YELLOW='\e[1;33m'
 tools=(
   docker
   subl
+  vim
 )
 
 DISTRO="$(lsb_release -is | tr '[:upper:]' '[:lower:]')"
@@ -20,6 +21,7 @@ CODENAME="$(lsb_release -cs)"
 
 version_docker()    { docker --version | grep -Po "Docker version \K.+"; }
 version_subl()      { subl --version | grep -Po "Sublime Text \K.+"; }
+version_vim()       { vim --version | head -1 | grep -Po "Vi IMproved \K.+"; }
 
 # ===============================================
 
@@ -62,6 +64,15 @@ install_subl() {
 
   sudo apt-get update
   sudo apt-get -y install sublime-text
+}
+
+install_vim() {
+  _apt_setup \
+    "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x4AB0F789CBA31744CC7DA76A8CF63AD3F06FC659" vim-ppa-launchpad.gpg \
+    "http://ppa.launchpad.net/jonathonf/vim/${DISTRO} ${CODENAME} main" vim-ppa-launchpad.list
+
+  sudo apt-get update
+  sudo apt-get -y install vim
 }
 
 _apt_setup() {
