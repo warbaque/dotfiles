@@ -24,7 +24,7 @@ version_terraform() { terraform version | grep -Po "Terraform \K\S+"; }
 
 # ===============================================
 
-_install () {(
+_install() {(
   local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
   trap "rm -rf ${tmp_dir}" EXIT
   cd "${tmp_dir}"
@@ -58,32 +58,28 @@ install_aws() {
 
 install_gcloud() {
   _apt_setup \
-    "https://packages.cloud.google.com/apt/doc/apt-key.gpg" \
-    google-cloud-sdk.gpg \
-    "https://packages.cloud.google.com/apt cloud-sdk main" \
-    google-cloud-sdk.list
+    "https://packages.cloud.google.com/apt/doc/apt-key.gpg" google-cloud-sdk.gpg \
+    "https://packages.cloud.google.com/apt cloud-sdk main" google-cloud-sdk.list
 
   sudo apt-get update
-  sudo apt-get install google-cloud-cli
+  sudo apt-get -y install google-cloud-cli
 }
 
 install_terraform() {
   _apt_setup \
-    "https://apt.releases.hashicorp.com/gpg" \
-    hashicorp-archive-keyring.gpg \
-    "https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
-    hashicorp.list
+    "https://apt.releases.hashicorp.com/gpg" hashicorp-archive-keyring.gpg \
+    "https://apt.releases.hashicorp.com $(lsb_release -cs) main" hashicorp.list
 
   sudo apt-get update
-  sudo apt-get install terraform
+  sudo apt-get -y install terraform
 }
 
 _apt_setup() {
-  local keyring=/etc/apt/trusted.gpg.d
-  sudo mkdir -p "${keyring}"
+  local key="/etc/apt/keyrings/${2}"
+  sudo mkdir -p -- "$(dirname -- "${key}")"
   curl -fsSL "${1}" \
-    | sudo gpg --yes --dearmor -o "${keyring}/${2}"
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=${keyring}/${2}] ${3}" \
+    | sudo gpg --yes --dearmor -o "${key}"
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=${key}] ${3}" \
     | sudo tee "/etc/apt/sources.list.d/${4}"
 }
 

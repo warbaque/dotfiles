@@ -4,8 +4,8 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-
 :set number
+:set cursorline
 :set autoindent
 :set tabstop=4
 :set shiftwidth=4
@@ -19,6 +19,8 @@ endif
 :set hlsearch
 :set incsearch
 
+:filetype plugin on
+:set omnifunc=syntaxcomplete#Complete
 
 call plug#begin()
   Plug 'tpope/vim-sensible'
@@ -31,19 +33,18 @@ call plug#begin()
   Plug 'ap/vim-css-color'
   Plug 'rafi/awesome-vim-colorschemes'
   Plug 'jayli/vim-easycomplete'
+  Plug 'SirVer/ultisnips'
   Plug 'mg979/vim-visual-multi'
 call plug#end()
 
-
 nnoremap <C-f> :NERDTreeFind<CR>
-nnoremap <C-k> :NERDTreeToggle<CR>
+nnoremap <C-l> :NERDTreeToggle<CR>
 nnoremap <F8> :TagbarToggle<CR>
 
 noremap gr :EasyCompleteReference<CR>
 noremap gd :EasyCompleteGotoDefinition<CR>
 noremap rn :EasyCompleteRename<CR>
 noremap gb :BackToOriginalBuffer<CR>
-let g:easycomplete_scheme="rider"
 
 :colorscheme jellybeans
 
