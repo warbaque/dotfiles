@@ -33,7 +33,6 @@ call plug#begin()
   Plug 'ap/vim-css-color'
   Plug 'rafi/awesome-vim-colorschemes'
   Plug 'jayli/vim-easycomplete'
-  Plug 'SirVer/ultisnips'
   Plug 'mg979/vim-visual-multi'
 call plug#end()
 
