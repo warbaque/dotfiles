@@ -75,6 +75,12 @@ _apt_setup() {
 
 # ===============================================
 
+install_all() {
+  for cmd in "${tools[@]}"; do
+    _install "${cmd}"
+  done
+}
+
 status() {
   echo -e "${CYAN}Status${RESET}"
   for cmd in "${tools[@]}"; do
@@ -84,7 +90,7 @@ status() {
 
 # ===============================================
 
-if [[ " ${tools[*]} " =~ " ${1} " ]]; then
+if [[ " all ${tools[*]} " =~ " ${1} " ]]; then
   _install "${@}"
 fi
 status

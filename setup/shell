@@ -1,5 +1,7 @@
 #! /bin/sh
 
+set -e
+
 # === [ANSI] ====================================
 
 RESET='\e[0m'
@@ -10,6 +12,25 @@ RED='\e[1;31m'
 
 err() { printf "${RED}E:${RESET} ${*}\n" >&2; exit 1; }
 warn() { printf "${YELLOW}W:${RESET} ${*}\n" >&2; }
+
+usage() {
+cat <<EOF
+Usage:
+  dotfiles/setup/shell <cmd> [<args>]
+
+Commands:
+  Install core packages:
+    minimal           minimal setup (zsh, dotfiles)
+    extra             extra packages
+    gui               gui packages
+    full {--no-gui}   install all
+    no-gui            full --no-gui
+
+  tools {category}    setup tools
+  dotfiles {dotfile}  setup dotfiles
+  sudoers             setup sudoers
+EOF
+}
 
 # ===============================================
 
@@ -46,7 +67,7 @@ status() {
   done
 }
 
-core_commands() {
+_commands() {
   status "${@}"
   if [ -n "${MISSING}" ]; then
     install ${MISSING}
@@ -80,7 +101,7 @@ setup_dotfiles_dir() {
 # ===============================================
 
 minimal() {
-  core_commands "minimal" sudo curl git zsh which jq
+  _commands "minimal" sudo curl git zsh which sed grep jq
   setup_zsh
   setup_dotfiles_dir
   ${HOME}/dotfiles/setup/dotfiles zshrc
@@ -100,7 +121,7 @@ pkg_map() {
 }
 
 extra() {
-  core_commands "extra" \
+  _commands "extra" \
     bash \
     wget \
     gpg \
@@ -109,7 +130,6 @@ extra() {
     tree \
     tmux \
     vim \
-    terminator \
     fdfind \
     man \
     lsb_release \
@@ -118,16 +138,29 @@ extra() {
   check_cmd fdfind && sudo install -o root -g root -m 0755 $(which fdfind) /usr/local/bin/fd
 }
 
+gui() {
+  [ "${1}" = '--no-gui' ] && return
+  _commands "gui" \
+    terminator
+}
+
 # ===============================================
 
 tools() {
   local cmd="${1}"; [ -n "${cmd-x}" ] && shift
+  local _dir="dotfiles/setup/tools"
+  local _tools="cloud|kube|node|go|dev"
   case "${cmd}" in
-    cloud|kube|node|go|dev) ${HOME}/dotfiles/setup/tools/${cmd} "${@}" ;;
-    *)  for tools in cloud kube node go dev; do
-          printf "\n${MAGENTA}dotfiles/setup/tools/${tools}${RESET}\n"
-          ${HOME}/dotfiles/setup/tools/${tools}
-        done ;;
+    cloud|kube|node|go|dev) ${HOME}/${_dir}/${cmd} "${@}" ;;
+    *)
+      for tools in cloud kube node go dev; do
+        printf "\n${MAGENTA}${_dir}/${tools}${RESET}\n"
+        ${HOME}/${_dir}/${tools} | sed "s/^\r*/  /"
+      done
+      echo
+      echo "Usage:"
+      echo "  dotfiles/setup/shell tools {${_tools}}"
+    ;;
   esac
 }
 
@@ -141,8 +174,10 @@ sudoers() {
 
 # ===============================================
 
-case "${@}" in
-  minimal|extra|tools*|sudoers*) "${@}" ;;
+case "${1}" in
+  minimal|extra|gui|tools*|sudoers*) "${@}" ;;
+  full) shift; minimal && extra && gui "${@}" ;;
+  no-gui) minimal && extra ;;
   dotfiles*) ${HOME}/dotfiles/setup/"${@}" ;;
-  *) minimal ;;
+  *) usage ;;
 esac
