@@ -1,10 +1,9 @@
 #! /usr/bin/env bash
 
-# === [ANSI] ====================================
+# ===============================================
 
-RESET='\e[0m'
-CYAN='\e[1;36m'
-YELLOW='\e[1;33m'
+script_root="$( cd -- "${BASH_SOURCE[0]%/*}" && pwd -P )"
+. "${script_root}/lib/helpers.bash"
 
 # ===============================================
 
@@ -20,8 +19,6 @@ tools=(
   flux
 )
 
-# ===============================================
-
 version_kubectl()   { kubectl version --client --output=json | jq -j .clientVersion.gitVersion; }
 version_kustomize() { kustomize version; }
 version_helm()      { helm version --short; }
@@ -34,38 +31,16 @@ version_flux()      { flux version --client | head -1 | grep -Po "flux: \K\S+"; 
 
 # ===============================================
 
-_install () {(
-  local tmp_dir="$(mktemp -d /tmp/install-XXXXX)"
-  trap "rm -rf ${tmp_dir}" EXIT
-  cd "${tmp_dir}"
-  echo -e "${CYAN}Installing${RESET} [${YELLOW}${1}${RESET}]"
-  "install_${1}" "${@:2}" | sed "s/^\r*/  /"
-)}
-
-_status() {
-  local cmd="${1}"
-  if command -v "${cmd}" >/dev/null 2>&1; then
-    local is_installed='✓'
-    local version="$(version_${cmd})";
-  else
-    local is_installed=' '
-    local version="";
-  fi
-  printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
-}
-
-# ===============================================
-
 install_kubectl() {
+  with_tmp
   curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
   sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-  rm kubectl
 }
 
 install_kustomize() {
+  with_tmp
   curl -sL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
   sudo install -o root -g root -m 0755 kustomize /usr/local/bin/kustomize
-  rm kustomize
 }
 
 install_helm() {
@@ -73,6 +48,7 @@ install_helm() {
 }
 
 install_minikube() {
+  with_tmp
   curl -sLO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
   sudo install -o root -g root -m 0755 minikube-linux-amd64 /usr/local/bin/minikube
 }
@@ -82,16 +58,19 @@ install_k3d() {
 }
 
 install_kind() {
+  with_tmp
   curl -sLO https://kind.sigs.k8s.io/dl/v0.15.0/kind-linux-amd64
   sudo install -o root -g root -m 0755 kind-linux-amd64 /usr/local/bin/kind
 }
 
 install_skaffold() {
+  with_tmp
   curl -sLO https://storage.googleapis.com/skaffold/releases/v2.0.0/skaffold-linux-amd64
   sudo install -o root -g root -m 0755 skaffold-linux-amd64 /usr/local/bin/skaffold
 }
 
 install_argo() {
+  with_tmp
   curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.4.3/argo-linux-amd64.gz
   gunzip argo-linux-amd64.gz
   sudo install -o root -g root -m 0755 argo-linux-amd64 /usr/local/bin/argo
@@ -103,22 +82,5 @@ install_flux() {
 
 # ===============================================
 
-install_all() {
-  for cmd in "${tools[@]}"; do
-    _install "${cmd}"
-  done
-}
-
-status() {
-  echo -e "${CYAN}Status${RESET}"
-  for cmd in "${tools[@]}"; do
-    _status "${cmd}"
-  done
-}
-
-# ===============================================
-
-if [[ " all ${tools[*]} " =~ " ${1} " ]]; then
-  _install "${@}"
-fi
+installer "${@}"
 status
