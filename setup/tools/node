@@ -1,10 +1,9 @@
 #! /usr/bin/env bash
 
-# === [ANSI] ====================================
+# ===============================================
 
-RESET='\e[0m'
-CYAN='\e[1;36m'
-YELLOW='\e[1;33m'
+script_root="$( cd -- "${BASH_SOURCE[0]%/*}" && pwd -P )"
+. "${script_root}/lib/helpers.bash"
 
 # ===============================================
 
@@ -15,8 +14,6 @@ tools=(
   yarn
 )
 
-# ===============================================
-
 version_nvm()   { nvm -v; }
 version_node()  { node --version; }
 version_npm()   { npm --version; }
@@ -24,25 +21,9 @@ version_yarn()  { yarn --version; }
 
 # ===============================================
 
-_install () {
-  [ "${1}" = npm ] && return
-  echo -e "${CYAN}Installing${RESET} [${YELLOW}${1}${RESET}]"
-  "install_${1}" "${@:2}" | sed "s/^\r*/  /"
+preinstall () {
+  [ "${1}" = npm ] && exit
 }
-
-_status() {
-  local cmd="${1}"
-  if command -v "${cmd}" >/dev/null 2>&1; then
-    local is_installed='✓'
-    local version="$(version_${cmd})";
-  else
-    local is_installed=' '
-    local version="";
-  fi
-  printf "${is_installed}  %-12s %s\n" "${cmd}" "${version}"
-}
-
-# ===============================================
 
 install_nvm() {
   curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
@@ -67,23 +48,6 @@ install_yarn() {
 
 # ===============================================
 
-install_all() {
-  for cmd in "${tools[@]}"; do
-    _install "${cmd}"
-  done
-}
-
-status() {
-  init_nvm
-  echo -e "${CYAN}Status${RESET}"
-  for cmd in "${tools[@]}"; do
-    _status "${cmd}"
-  done
-}
-
-# ===============================================
-
-if [[ " all ${tools[*]} " =~ " ${1} " ]]; then
-  _install "${@}"
-fi
+installer "${@}"
+init_nvm
 status
