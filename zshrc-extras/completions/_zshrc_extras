@@ -1,0 +1,35 @@
+#compdef zshrc-extras
+
+_zshrc_extras() {
+  local ret=1
+  local state line
+
+  local -a cmds
+  cmds=(
+    'enable:enable config (alias: add)'
+    'enable-all:enable all configs'
+    'disable:disable config (aliases: del rm)'
+    'disable-all:disable all configs (alias: reset'
+    'load:load available <file>'
+    'reload:load all enabled files'
+    'status:show status (aliases: list ls)'
+  )
+
+  #_describe 'command' cmds
+
+  _arguments -C \
+    '1: :->cmds' \
+    '*::arg:->args' \
+    && ret=0
+
+  case "${state}" in
+    (cmds) _describe 'command' cmds ;;
+    (args)
+      case "${line[1]}" in
+        add|del|rm|enable|load|disable) _arguments -s '1:available_files:_path_files -W "${HOME}/dotfiles/zshrc-extras/available" -g "*(.)"' ;;
+      esac
+    ;;
+  esac
+}
+
+_zshrc_extras "${@}"
