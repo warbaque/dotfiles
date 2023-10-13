@@ -55,3 +55,8 @@ if &term =~ '^screen'
   execute "set <xLeft>=\e[1;*D"
 endif
 
+" copy & paste
+nnoremap <C-y> "+y
+vnoremap <C-y> "+y
+nnoremap <C-p> "+gP
+vnoremap <C-p> "+gP
