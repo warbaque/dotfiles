@@ -90,6 +90,9 @@ zshrc-extras() {
     *) "${script_root}/init.zsh" "\${@}" ;;
   esac
 }
+helper() {
+  "${script_root}/../setup/shell" "\${@}"
+}
 fpath+=( "${script_root}/completions" )
 EOF
 }

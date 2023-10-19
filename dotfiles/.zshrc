@@ -19,7 +19,7 @@ autoload -Uz _zinit
 
 # ==================================================
 
-zinit depth=1 lucid nocd for romkatv/powerlevel10k
+zinit ice depth=1; zinit light romkatv/powerlevel10k
 
 zinit snippet OMZL::grep.zsh
 zinit snippet OMZL::directories.zsh
@@ -29,7 +29,7 @@ zinit snippet OMZL::key-bindings.zsh
 
 zinit load unixorn/kubectx-zshplugin
 
-zinit snippet https://github.com/warbaque/dotfiles/blob/main/.p10k.zsh
+zinit snippet https://github.com/warbaque/dotfiles/blob/main/dotfiles/.p10k.zsh
 
 zinit ice blockf atpull'zinit creinstall -q .'
 zinit light zsh-users/zsh-completions
@@ -78,7 +78,7 @@ kube-toggle() {
   if (( ${+POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND} )); then
     unset POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND
   else
-    POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND='kubectl|helm|kubens|kubectx|oc|istioctl|kogito|k9s|helmfile|flux|fluxctl|stern'
+    POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND='kubectl|helm|kubens|kubectx|oc|istioctl|kogito|k9s|helmfile|flux|fluxctl|stern|kubeseal|skaffold|kubent|kubecolor|cmctl|sparkctl'
   fi
   p10k reload
   if zle; then
@@ -88,4 +88,3 @@ kube-toggle() {
 }
 
 # ==================================================
-

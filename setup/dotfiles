@@ -8,16 +8,18 @@ YELLOW='\e[1;33m'
 
 # ===============================================
 
+dotfiles_root="$( cd -- "${BASH_SOURCE[0]%/*}/.." && pwd -P )"
+
 check_link() {
-  local src="${HOME}/dotfiles/.${1}"
+  local src="${dotfiles_root}/dotfiles/.${1}"
   local dst="${HOME}/.${1}"
 
   if [ "$(realpath -P "${src}")" = "$(realpath -P "${dst}")" ]; then
-    printf "  ✓  %-20s -> %-20s\n" "${dst#$HOME/}" "${src#$HOME/}"
+    printf "  ✓  %-20s -> %-20s\n" "${dst#$HOME/}" "${src#${dotfiles_root}/}"
   elif [ -e "${dst}" ]; then
-    printf "     %-20s != %-20s\n" "(local file)" "${src#$HOME/}"
+    printf "     %-20s != %-20s\n" "(local file)" "${src#${dotfiles_root}/}"
   else
-    printf "     %-20s != %-20s\n" "(not set)" "${src#$HOME/}"
+    printf "     %-20s != %-20s\n" "(not set)" "${src#${dotfiles_root}/}"
   fi 2>/dev/null
 }
 
@@ -40,7 +42,7 @@ mklinks() {
           && dotfile="${candinate}" || unset dotfile ;;
       esac
     done
-    local src="${HOME}/dotfiles/.${dotfile}"
+    local src="${dotfiles_root}/dotfiles/.${dotfile}"
     local dst="${HOME}/.${dotfile}"
     if [ -z "${dotfile}" ]; then
       UNKNOWN_DOTFILES+=("${YELLOW}WARN${RESET}: unknown dotfile: ${pattern}\n")

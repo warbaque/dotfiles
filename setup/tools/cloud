@@ -17,7 +17,7 @@ tools=(
 version_az()        { az version | jq -j '."azure-cli"'; }
 version_aws()       { aws --version | grep -Po "aws-cli/\K\S+"; }
 version_gcloud()    { gcloud version | grep -Po "Google Cloud SDK \K\S+"; }
-version_terraform() { terraform version | grep -Po "Terraform \K\S+"; }
+version_terraform() { terraform version -json | jq -r .terraform_version; }
 
 # ===============================================
 
