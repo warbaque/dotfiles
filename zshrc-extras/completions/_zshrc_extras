@@ -9,13 +9,11 @@ _zshrc_extras() {
     'enable:enable config (alias: add)'
     'enable-all:enable all configs'
     'disable:disable config (aliases: del rm)'
-    'disable-all:disable all configs (alias: reset'
+    'disable-all:disable all configs (alias: reset)'
     'load:load available <file>'
     'reload:load all enabled files'
     'status:show status (aliases: list ls)'
   )
-
-  #_describe 'command' cmds
 
   _arguments -C \
     '1: :->cmds' \

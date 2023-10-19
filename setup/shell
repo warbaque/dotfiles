@@ -15,17 +15,19 @@ warn() { printf "${YELLOW}W:${RESET} ${*}\n" >&2; }
 
 usage() {
 cat <<EOF
-Usage:
-  dotfiles/setup/shell <cmd> [<args>]
+usage:
+  setup/shell <cmd> [<args>]
 
-Commands:
-  Install core packages:
-    minimal           minimal setup (zsh, dotfiles)
-    extra             extra packages
-    gui               gui packages
-    full {--no-gui}   install all
-    no-gui            full --no-gui
+Available commands:
 
+[install core packages]
+  minimal             minimal setup (zsh, dotfiles)
+  extra               extra packages
+  gui                 gui packages
+  full {--no-gui}     install all
+  no-gui              full --no-gui
+
+[setup]
   tools {category}    setup tools
   dotfiles {dotfile}  setup dotfiles
   sudoers             setup sudoers
@@ -159,7 +161,7 @@ tools() {
       done
       echo
       echo "Usage:"
-      echo "  dotfiles/setup/shell tools {${_tools}}"
+      echo "  setup/shell tools {${_tools}}"
     ;;
   esac
 }
