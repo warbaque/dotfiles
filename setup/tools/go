@@ -1,14 +1,11 @@
 #! /usr/bin/env bash
 
-
 run_as_root() {
   sudo bash -c "$(declare -f "${1}"); ${*}" \
     | sed "s/^/(as root) /"
 }
 
-
 VERSION_INSTALLED="$(/usr/local/go/bin/go version 2>/dev/null | cut -d" " -f3)"
-
 
 versions() {
   curl -sL https://go.dev/dl/ \
@@ -17,14 +14,12 @@ versions() {
     | sed -r "s@  (${VERSION_INSTALLED})\$@* \1@"
 }
 
-
 __download() {
   rm -rf /usr/local/go
   echo "Downloading [${1}] to /usr/local"
   curl -s "https://dl.google.com/go/${1}.linux-amd64.tar.gz" \
     | tar xzf - -C /usr/local
 }
-
 
 update() {
   if [[ "${1}" =~ go1(\.[0-9]+)+ ]]; then
@@ -54,7 +49,6 @@ update() {
   echo
 }
 
-
 setup() {
   echo "Create the skeleton for your local users go directory"
   mkdir -p "$HOME/go"/{bin,pkg,src}
@@ -64,11 +58,10 @@ setup() {
   echo 'export PATH="${PATH}:/usr/local/go/bin:${GOPATH}/bin"'
 }
 
-
 case "${1}" in
+  _commands) echo "check update install setup versions";;
   check) update dryrun ;;
   update|install) update "${@:2}" ;;
   setup|versions) "${@}" ;;
   *) echo -e "Usage:\n  ${0##*/} {check|update|install|setup|versions}"; update dryrun ;;
 esac
-
