@@ -22,12 +22,22 @@ version_teams()     { teams-for-linux --version; }
 # ===============================================
 
 install_docker() {
+  case ${CODENAME} in
+    bullseye|bookworm|lunar|kinetic|jammy|focal) local codename=${CODENAME} ;;
+    *) local codename=bookworm ;;
+  esac
+
   apt_setup \
     "https://download.docker.com/linux/${DISTRO}/gpg" docker.gpg \
-    "https://download.docker.com/linux/${DISTRO} ${CODENAME} stable" docker-stable.list
+    "https://download.docker.com/linux/${DISTRO} ${codename} stable" docker-stable.list
 
   sudo apt-get update
-  sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  sudo apt-get -y install \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-buildx-plugin \
+    docker-compose-plugin
   sudo usermod -a -G docker $(whoami)
 }
 
