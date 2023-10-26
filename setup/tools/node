@@ -48,6 +48,11 @@ install_yarn() {
 
 # ===============================================
 
-installer "${@}"
-init_nvm
-status
+case "${1}" in
+  _commands) echo "${tools[*]}";;
+  *)
+    installer "${@}"
+    init_nvm
+    status
+  ;;
+esac

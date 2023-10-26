@@ -82,5 +82,10 @@ install_flux() {
 
 # ===============================================
 
-installer "${@}"
-status
+case "${1}" in
+  _commands) echo "${tools[*]}";;
+  *)
+    installer "${@}"
+    status
+  ;;
+esac

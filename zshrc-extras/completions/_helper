@@ -1,5 +1,10 @@
 #compdef helper
 
+tools_list() {
+  cmd="${HOME}/dotfiles/setup/tools/${1}"
+  [ -f "${cmd}" ] && "${cmd}" _commands
+}
+
 _helper() {
   local ret=1
   local state line
@@ -33,11 +38,10 @@ _helper() {
     (args)
       case "${line[1]}" in
         full) _arguments '1:arguments:--no-gui' ;;
-        tools) _arguments '1:available_tools:_path_files -W "${HOME}/dotfiles/setup/tools" -g "*(.)"' ;;
+        tools) _arguments '1:available_tools:_path_files -W "${HOME}/dotfiles/setup/tools" -g "*(.)"' "::install_tool:($(tools_list ${line[2]}))" ;;
         dotfiles) _values -w 'description' "${dotfiles[@]}" ;;
       esac
     ;;
   esac
 }
-
 _helper "${@}"
