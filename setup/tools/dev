@@ -10,12 +10,14 @@ script_root="$( cd -- "${BASH_SOURCE[0]%/*}" && pwd -P )"
 tools=(
   docker
   subl
+  code
   slack
   teams
 )
 
 version_docker()    { docker --version | grep -Po "Docker version \K.+"; }
 version_subl()      { subl --version | grep -Po "Sublime Text \K.+"; }
+version_code()      { code --version | head -1 ; }
 version_slack()     { slack --version; }
 version_teams()     { teams-for-linux --version; }
 
@@ -48,6 +50,15 @@ install_subl() {
 
   sudo apt-get update
   sudo apt-get -y install sublime-text
+}
+
+install_code() {
+  apt_setup \
+    "https://packages.microsoft.com/keys/microsoft.asc" vscode.gpg \
+    "https://packages.microsoft.com/repos/code stable main" vscode.list
+
+  sudo apt-get update
+  sudo apt-get -y install code
 }
 
 install_slack() {
