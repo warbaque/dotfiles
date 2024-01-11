@@ -17,6 +17,7 @@ tools=(
   skaffold
   argo
   flux
+  k9s
 )
 
 version_kubectl()   { kubectl version --client --output=json | jq -j .clientVersion.gitVersion; }
@@ -28,6 +29,7 @@ version_kind()      { kind version | grep -Po "kind \K(\S+)"; }
 version_skaffold()  { skaffold version; }
 version_argo()      { argo version --short | grep -Po "argo: \K\S+"; }
 version_flux()      { flux version --client | head -1 | grep -Po "flux: \K\S+"; }
+version_k9s()       { k9s version --short | head -1 | grep -Po "Version *\K\S+"; }
 
 # ===============================================
 
@@ -78,6 +80,13 @@ install_argo() {
 
 install_flux() {
   curl -sL https://fluxcd.io/install.sh | sudo bash
+}
+
+install_k9s() {
+  with_tmp
+  local download_url="$(curl -s https://api.github.com/repos/derailed/k9s/releases/latest | jq -r '.assets[] | select(.name == "k9s_Linux_amd64.tar.gz").browser_download_url')"
+  curl -sSL "${download_url}" | tar xz
+  sudo install -o root -g root -m 0755 k9s /usr/local/bin/k9s
 }
 
 # ===============================================
