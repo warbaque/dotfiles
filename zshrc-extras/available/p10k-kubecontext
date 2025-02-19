@@ -1,1 +1,4 @@
-POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND='kubectl|helm|kubens|kubectx|oc|istioctl|kogito|k9s|helmfile|flux|fluxctl|stern|kubeseal|skaffold|kubent|kubecolor|cmctl|sparkctl'
+# show kubecontext always instead only on command
+if (( ${+POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND} )); then
+  unset POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND
+fi
