@@ -20,3 +20,5 @@
 	patch = !git --no-pager diff --no-color
 [pager]
 	diff = diff-so-fancy | less --tabs=4 -RFXS
+[include]
+	path = ~/.ssh/gitconfig
