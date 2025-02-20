@@ -17,44 +17,44 @@ enabled="${script_root}/enabled"
 mkdir -p "${available}"
 mkdir -p "${enabled}"
 
-zshrc-extras-check() {
-  if [ "$(realpath -P "${enabled}/${1}")" = "$(realpath -P "${available}/${1}")" ]; then
-    printf "${GREEN}[✓] ${CYAN}enabled${RESET} ${1}\n"
-    printf "${DARK_GRAY}$(cat "${enabled}/${1}")${RESET}\n"
+for-each-link() {
+  local src="${1:a}"
+  local op="${2}"
+
+  if test -f "${src}"; then
+    local config="${src/${available}\//}"
+    local dst="${enabled}/${config//\//--}"
+    case "${op}" in
+      create) ln -sf "../available/${config}" "${dst}" ;;
+      delete) rm -f "${dst}" ;;
+      status)
+        if [ "$(realpath -P "${src}")" = "$(realpath -P "${dst}")" ]; then
+          printf "${GREEN}[✓] ${CYAN}enabled${RESET} ${config}\n"
+        else
+          printf "${YELLOW}[ ] ${CYAN}available${RESET} ${config}\n"
+        fi
+        printf "${DARK_GRAY}$(cat "${src}")${RESET}\n"
+        ;;
+    esac
+  elif test -d "${src}"; then
+    for config in "${src}"/*; do
+      for-each-link "${config}" "${op}"
+    done
   else
-    printf "${YELLOW}[ ] ${CYAN}available${RESET} ${1}\n"
-    printf "${DARK_GRAY}$(cat "${available}/${1}")${RESET}\n"
+    echo "${0}: failed to ${op} link '${src}': Missing file"
   fi
 }
 
-zshrc-extras-mklink() {
-  if test -f "${available}/${1}"; then
-    ln -s "../available/${1}" "${enabled}/${1}"
-  else
-    echo "${0}: failed to create link '${available}/${1}': Missing file"
-  fi
-}
-
-zshrc-extras-rmlink() {
-  if test -f "${enabled}/${1}"; then
-    rm "${enabled}/${1}"
-  else
-    echo "${0}: failed to delete link '${enabled}/${1}': Missing file"
-  fi
-}
-
-for-each-config() {
-  for config in "${1}"/*; do
-    ${2} ${config##*/}
-  done
-}
+zshrc-extras-mklink() { for-each-link "${1}" create;  }
+zshrc-extras-rmlink() { for-each-link "${1}" delete;  }
+zshrc-extras-status() { for-each-link "${1}" status;  }
 
 zshrc-extras-setup() {
   case "${1}" in
-    enable|add) zshrc-extras-mklink "${2}" ;;
-    disable|del|rm) zshrc-extras-rmlink "${2}" ;;
-    enable-all) for-each-config "${available}" zshrc-extras-mklink ;;
-    disable-all|reset) for-each-config "${enabled}" zshrc-extras-rmlink ;;
+    enable|add) (( $+2 )) && zshrc-extras-mklink "${available}/${2}" ;;
+    disable|del|rm) (( $+2 )) && zshrc-extras-rmlink "${available}/${2}" ;;
+    enable-all) zshrc-extras-mklink "${available}" ;;
+    disable-all|reset) zshrc-extras-rmlink "${available}" ;;
     status|list|ls) ;;
     help|"")
       echo "usage: zshrc-extras <cmd> [<args>...]"
@@ -100,7 +100,7 @@ EOF
 if [ -t 1 ]; then
   zshrc-extras-setup "${@}"
   echo
-  for-each-config "${available}" zshrc-extras-check
+  zshrc-extras-status "${available}"
 else
   zshrc-extras-init
 fi

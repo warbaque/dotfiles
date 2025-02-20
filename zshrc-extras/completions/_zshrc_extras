@@ -4,8 +4,7 @@ _zshrc_extras() {
   local ret=1
   local state line
 
-  local -a cmds
-  cmds=(
+  local cmds; cmds=(
     'enable:enable config (alias: add)'
     'enable-all:enable all configs'
     'disable:disable config (aliases: del rm)'
@@ -21,13 +20,14 @@ _zshrc_extras() {
     && ret=0
 
   case "${state}" in
-    (cmds) _describe 'command' cmds ;;
+    (cmds) _describe -V 'command' cmds ;;
     (args)
       case "${line[1]}" in
-        add|del|rm|enable|load|disable) _arguments -s '1:available_files:_path_files -W "${HOME}/dotfiles/zshrc-extras/available" -g "*(.)"' ;;
+        add|del|rm|enable|load|disable) _arguments '1:files:_path_files -W "${HOME}/dotfiles/zshrc-extras/available" -g "**/*"' && ret=0 ;;
       esac
     ;;
   esac
+  return ret
 }
 
 _zshrc_extras "${@}"
