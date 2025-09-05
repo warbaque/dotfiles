@@ -19,7 +19,7 @@ version_docker()    { docker --version | grep -Po "Docker version \K.+"; }
 version_subl()      { subl --version | grep -Po "Sublime Text \K.+"; }
 version_code()      { code --version | head -1 ; }
 version_slack()     { slack --version; }
-version_teams()     { teams-for-linux --version; }
+version_teams()     { teams-for-linux --version 2>/dev/null; }
 
 # ===============================================
 
@@ -63,7 +63,7 @@ install_code() {
 
 install_slack() {
   apt_setup \
-    "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC6ABDCF64DB9A0B2" slack-desktop.gpg \
+    "https://packagecloud.io/slacktechnologies/slack/gpgkey" slack-desktop.gpg \
     "https://packagecloud.io/slacktechnologies/slack/debian jessie main" slack-desktop.list
 
   sudo apt-get update

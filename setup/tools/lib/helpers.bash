@@ -8,8 +8,10 @@ YELLOW='\e[1;33m'
 
 # ===============================================
 
-DISTRO="$(lsb_release -is | tr '[:upper:]' '[:lower:]')"
-CODENAME="$(lsb_release -cs)"
+if command -v lsb_release >/dev/null 2>&1; then
+  DISTRO="$(lsb_release -is | tr '[:upper:]' '[:lower:]')"
+  CODENAME="$(lsb_release -cs)"
+fi
 
 declare -A log_priority=(
   [TRACE]=0

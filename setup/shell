@@ -143,7 +143,8 @@ extra() {
 gui() {
   [ "${1}" = '--no-gui' ] && return
   _commands "gui" \
-    terminator
+    terminator \
+    xclip
 }
 
 # ===============================================
@@ -151,11 +152,11 @@ gui() {
 tools() {
   local cmd="${1}"; [ -n "${cmd-x}" ] && shift
   local _dir="dotfiles/setup/tools"
-  local _tools="cloud|kube|node|go|dev"
+  local _tools="cloud|kube|node|python|go|dev"
   case "${cmd}" in
-    cloud|kube|node|go|dev) ${HOME}/${_dir}/${cmd} "${@}" ;;
+    cloud|kube|node|python|go|dev) ${HOME}/${_dir}/${cmd} "${@}" ;;
     *)
-      for tools in cloud kube node go dev; do
+      for tools in cloud kube node python go dev; do
         printf "\n${MAGENTA}${_dir}/${tools}${RESET}\n"
         ${HOME}/${_dir}/${tools} | sed "s/^\r*/  /"
       done

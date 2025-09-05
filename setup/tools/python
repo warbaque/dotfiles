@@ -1,0 +1,65 @@
+#! /usr/bin/env bash
+
+# ===============================================
+
+script_root="$( cd -- "${BASH_SOURCE[0]%/*}" && pwd -P )"
+. "${script_root}/lib/helpers.bash"
+
+# ===============================================
+
+tools=(
+  uv
+  aws-sso-util
+  ykman
+)
+
+version_uv()              { uv --version | cut -d' ' -f2; }
+version_aws-sso-util()    { aws-sso-util --version; }
+version_ykman()           { ykman --version | awk -F' ' '{print $NF}'; }
+
+# ===============================================
+
+preinstall() {
+  case "${1}" in
+    aws-sso-util|ykman)
+      command -v uv &>/dev/null || installer uv
+      ;;
+  esac
+}
+
+install_uv() {
+  curl -LsSf https://astral.sh/uv/install.sh | UV_NO_MODIFY_PATH=1 sh
+}
+
+install_aws-sso-util() {
+  uv tool install aws-sso-util
+}
+
+install_ykman() {
+  local dependencies=(
+    build-essential
+    pcscd
+    libpcsclite-dev
+  )
+
+  local missing=()
+  for pkg in ${dependencies[@]}; do
+    dpkg -l "${pkg}" &>/dev/null \
+      || missing+=("${pkg}")
+  done
+
+  [[ ${#missing[@]} -gt 0 ]] && {
+    apt-get update
+    apt-get install -y "${missing[@]}"
+  }
+
+  uv tool install yubikey-manager
+}
+
+case "${1}" in
+  _commands) echo "${tools[*]}";;
+  *)
+    installer "${@}"
+    status
+  ;;
+esac
