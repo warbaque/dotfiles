@@ -29,7 +29,7 @@ for-each-link() {
       delete) rm -f "${dst}" ;;
       status)
         if [ "$(realpath -P "${src}")" = "$(realpath -P "${dst}")" ]; then
-          printf "${GREEN}[✓] ${CYAN}enabled${RESET} ${config}\n"
+          printf  "${GREEN}[✓] ${CYAN}enabled  ${RESET} ${config}\n"
         else
           printf "${YELLOW}[ ] ${CYAN}available${RESET} ${config}\n"
         fi
@@ -86,6 +86,14 @@ zshrc-extras() {
       for config in "${enabled}"/*(NnOn); do
         . "\${config}"
       done
+      for project in "${script_root}/projects"/*(NnOn); do
+        test -e "\${project}/cli" &&
+          . <("\${project}/cli" init)
+        test -d "\${project}/autoload" &&
+          for file in "\${project}/autoload"/*(NnOn); do
+            . "\${file:A}"
+          done
+      done
       ;;
     *) "${script_root}/init.zsh" "\${@}" ;;
   esac
@@ -94,6 +102,10 @@ helper() {
   "${script_root}/../setup/shell" "\${@}"
 }
 fpath+=( "${script_root}/completions" )
+for project in "${script_root}/projects"/*(NnOn); do
+  test -d "\${project}/completions" &&
+    fpath+=( "'"\${project:A}/completions"'" )
+done
 EOF
 }
 
@@ -103,4 +115,14 @@ if [ -t 1 ]; then
   zshrc-extras-status "${available}"
 else
   zshrc-extras-init
+  for project in "${script_root}/projects"/*(NnOn); do
+    test -e "${project}/cli" &&
+      "${project}/cli" init
+    test -d "${project}/autoload" &&
+      for file in "${project}/autoload"/*(NnOn); do
+        echo . "${file:A}"
+      done
+    test -d "${project}/completions" &&
+      echo 'fpath+=( "'"${project:A}/completions"'" )'
+  done
 fi

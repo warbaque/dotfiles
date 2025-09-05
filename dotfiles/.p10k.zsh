@@ -42,6 +42,7 @@
     command_execution_time    # previous command duration
     virtualenv                # python virtual environment
     kubecontext
+    aws_profile
     background_jobs
     time                      # current time
     # =========================[ Line #2 ]=========================
@@ -273,6 +274,15 @@
   typeset -g POWERLEVEL9K_TIME_FOREGROUND=$grey
   typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%H:%M:%S}'
   typeset -g POWERLEVEL9K_TIME_UPDATE_ON_COMMAND=false
+
+  ##########[ aws: profile ]#############################################################
+
+  function prompt_aws_profile() {
+    p10k segment -f 208 -t "${AWS_PROFILE}"
+  }
+
+  typeset -g POWERLEVEL9K_AWS_PROFILE_COMMANDS='aws'
+  typeset -g POWERLEVEL9K_AWS_PROFILE_SHOW_ON_COMMAND="${POWERLEVEL9K_AWS_PROFILE_COMMANDS}"
 
   ##########[ prompt: transient/instant ]################################################
 
