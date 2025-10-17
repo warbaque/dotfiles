@@ -10,14 +10,18 @@ script_root="$( cd -- "${BASH_SOURCE[0]%/*}" && pwd -P )"
 tools=(
   az
   aws
+  granted
   gcloud
   terraform
+  terragrunt
 )
 
-version_az()        { az version | jq -j '."azure-cli"'; }
-version_aws()       { aws --version | grep -Po "aws-cli/\K\S+"; }
-version_gcloud()    { gcloud version | grep -Po "Google Cloud SDK \K\S+"; }
-version_terraform() { terraform version -json | jq -r .terraform_version; }
+version_az()          { az version | jq -j '."azure-cli"'; }
+version_aws()         { aws --version | grep -Po "aws-cli/\K\S+"; }
+version_granted()     { granted --version | awk -F' ' '{print $NF}'; }
+version_gcloud()      { gcloud version | grep -Po "Google Cloud SDK \K\S+"; }
+version_terraform()   { terraform version -json | jq -r .terraform_version; }
+version_terragrunt()  { terragrunt -v | awk -F' ' '{print $NF}'; }
 
 # ===============================================
 
@@ -31,6 +35,13 @@ install_aws() {
   curl -sLO "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
   unzip awscli-exe-linux-x86_64.zip
   sudo ./aws/install "${@}"
+}
+
+install_granted() {
+  with_tmp
+  curl -sLO releases.commonfate.io/granted/v0.36.2/granted_0.36.2_linux_x86_64.tar.gz
+  sudo tar -zxvf ./granted_0.36.2_linux_x86_64.tar.gz -C /usr/local/bin/
+  sudo ln -sf /usr/local/bin/granted /usr/local/bin/assumego
 }
 
 install_gcloud() {
@@ -49,6 +60,12 @@ install_terraform() {
 
   sudo apt-get update
   sudo apt-get -y install terraform
+}
+
+install_terragrunt() {
+  with_tmp
+  curl -sLO "https://github.com/gruntwork-io/terragrunt/releases/download/v0.91.1/terragrunt_linux_amd64"
+  sudo install -o root -g root -m 0755 terragrunt_linux_amd64 /usr/local/bin/terragrunt
 }
 
 # ===============================================
