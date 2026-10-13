@@ -1,92 +1,111 @@
-# ==================================================
-
-ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"/zinit
-
-# install zinit
-test -d "${ZINIT_HOME}" || {
-  mkdir -p "${ZINIT_HOME}"
-  git clone --depth 1 https://github.com/zdharma-continuum/zinit.git "${ZINIT_HOME}"/bin
-}
-
 # instant mode p10k
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-source "${ZINIT_HOME}"/bin/zinit.zsh
 
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+path+=("$HOME/.local/bin")
 
 # ==================================================
 
-zinit ice depth=1; zinit light romkatv/powerlevel10k
+ANTIDOTE=${ZDOTDIR:-$HOME}/.antidote
 
-zinit snippet OMZL::grep.zsh
-zinit snippet OMZL::directories.zsh
-zinit snippet OMZL::history.zsh
-zinit snippet OMZL::completion.zsh
-zinit snippet OMZL::key-bindings.zsh
-
-zinit load unixorn/kubectx-zshplugin
-
-zinit snippet https://github.com/warbaque/dotfiles/blob/main/dotfiles/.p10k.zsh
-
-zinit ice blockf atpull'zinit creinstall -q .'
-zinit light zsh-users/zsh-completions
-
-zinit load zdharma-continuum/history-search-multi-word
-zstyle ":history-search-multi-word" page-size "LINES/2"
-zstyle ":history-search-multi-word" highlight-color "bold,fg=yellow"
-zstyle ":plugin:history-search-multi-word" active "bold,standout"
-zinit light zdharma-continuum/fast-syntax-highlighting
-
-zinit ice lucid as"program" pick"bin/git-dsf"
-zinit load zdharma-continuum/zsh-diff-so-fancy
-
-zinit pack for ls_colors
-
-# ==================================================
-# PROJECT SPECIFIC CUSTOMIZATION
-test -d "${HOME}/dotfiles" && {
-  . <("${HOME}/dotfiles/zshrc-extras/init.zsh")
+test -d "${ANTIDOTE}" || {
+  git clone --depth=1 https://github.com/mattmc3/antidote.git "${ANTIDOTE}"
 }
 
-autoload -Uz compinit; compinit;
-zinit cdreplay -q
-(( $+functions[zshrc-extras] )) && zshrc-extras reload
+fpath=("${ANTIDOTE}"/functions $fpath)
+autoload -Uz antidote
 
-# ===[ALIASES]======================================
+if [[ ! ${ZDOTDIR:-$HOME}/.zsh_plugins.zsh -nt ${ZDOTDIR:-$HOME}/.zshrc ]]; then
+  antidote bundle >|${ZDOTDIR:-$HOME}/.zsh_plugins.zsh <<PLUGINS
+romkatv/powerlevel10k
+warbaque/dotfiles path:dotfiles/.p10k.zsh
 
+zsh-users/zsh-completions kind:fpath path:src
+
+ohmyzsh/ohmyzsh path:lib/key-bindings.zsh
+using:mattmc3/zephyr path:plugins
+  color
+  completion
+  directory
+  history
+  zfunctions
+
+unixorn/kubectx-zshplugin kind:defer
+zdharma-continuum/history-search-multi-word kind:defer
+zdharma-continuum/fast-syntax-highlighting kind:defer
+
+zdharma-continuum/zsh-diff-so-fancy from:gh-r binstub:bin/git-dsf
+PLUGINS
+fi
+
+source ${ZDOTDIR:-$HOME}/.zsh_plugins.zsh
+
+# ==================================================
+
+zstyle ":plugin:history-search-multi-word" clear-on-cancel "yes"
+zstyle ":plugin:history-search-multi-word" reset-prompt-protect 1
+
+zstyle ":plugin:history-search-multi-word" page-size "LINES/2"
+zstyle ":plugin:history-search-multi-word" highlight-color "bold,fg=yellow"
+zstyle ":plugin:history-search-multi-word" active "bold,standout"
+
+# HSMW can leave SIGINT ignored after cancelling recursive-edit with Powerlevel10k.
+# Restore the prompt's handler after every search, including interrupted searches.
+_dotfiles_init_history_search() {
+  (( ${+functions[_dotfiles_history_search_original]} )) && return
+  autoload +X history-search-multi-word || return
+  functions -c history-search-multi-word _dotfiles_history_search_original
+  history-search-multi-word() {
+    {
+      _dotfiles_history_search_original "$@"
+    } always {
+      if [[ -n ${__p9k_trapint-} ]]; then
+        trap "$__p9k_trapint" INT
+      fi
+    }
+  }
+}
+zsh-defer _dotfiles_init_history_search
+
+# ==================================================
+
+setopt auto_cd
+
+# replace ls with eza
+alias l='eza -al --color=always --group-directories-first --icons=always'
+alias ls='eza --color=always --group-directories-first --icons=always'
+alias la='eza -a --color=always --group-directories-first --icons=always'
+alias ll='eza -l --color=always --group-directories-first --icons=always'
+alias lt='eza -aT --color=always --group-directories-first --icons=always'
+alias l.="eza -a | grep -e '^\.'"
+
+# git
 alias gs="git status --short"
 alias gd="git diff"
 alias gl="git log --graph --decorate --oneline --all"
 alias gll="git log --graph --pretty=format:'%C(auto)%>|(12)%h%Creset %C(green)%cr %C(bold blue)%aN%Creset%C(auto)%d%Creset %s' --abbrev-commit --all"
 
-alias ls="ls --color=auto"
-alias diff="diff --color"
+# common use
+alias tarnow='tar -acf '
+alias untar='tar -zxvf '
+alias wget='wget -c '
+alias psmem='ps auxf | sort -nr -k 4'
+alias psmem10='ps auxf | sort -nr -k 4 | head -10'
+alias hw='hwinfo --short'
+alias big="expac -H M '%m\t%n' | sort -h | nl"
 
-# ==================================================
-#setopt 'auto_cd'    'no_bg_nice'    'no_flow_control'  'hist_find_no_dups'
-#setopt 'c_bases'    'hist_verify'   'auto_param_slash' 'hist_ignore_space'
-#setopt 'multios'    'always_to_end' 'complete_in_word' 'interactive_comments'
-#setopt 'path_dirs'  'extended_glob' 'extended_history' 'hist_expire_dups_first'
-#setopt 'auto_pushd' 'share_history' 'hist_ignore_dups' 'no_prompt_bang'
-#setopt 'prompt_cr'  'prompt_sp'     'prompt_percent'   'no_prompt_subst'
-#setopt 'no_bg_nice' 'no_aliases'    'typeset_silent'
+# pacman
+alias fixpacman="sudo rm /var/lib/pacman/db.lck"
+alias gitpkg='pacman -Q | grep -i "\-git" | wc -l'
+alias update='sudo cachyos-rate-mirrors && sudo pacman -Syu'
+alias mirror="sudo cachyos-rate-mirrors"
+alias cleanup='sudo pacman -Rns $(pacman -Qtdq)'
+alias cleanch="sudo paccache -r -k 2"
+alias rmpkg="sudo pacman -Rsn"
 
-kube-toggle() {
-  if (( ${+POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND} )); then
-    unset POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND
-  else
-    POWERLEVEL9K_KUBECONTEXT_SHOW_ON_COMMAND="${POWERLEVEL9K_KUBECONTEXT_COMMANDS}"
-  fi
-  p10k reload
-  if zle; then
-    zle push-input
-    zle accept-line
-  fi
-}
+# get the error messages from journalctl
+alias jctl="journalctl -p 3 -xb"
 
-# ==================================================
-
-path+=("$HOME/.local/bin")
+# recent installed packages
+alias rip="expac --timefmt='%Y-%m-%d %T' '%l\t%n %v' | sort | tail -200 | nl"
